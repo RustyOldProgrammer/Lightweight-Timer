@@ -1,0 +1,12 @@
+# Rust build
+/target
+# Backup / editor files
+**/*.rs.bk
+# IDEs
+.vscode/
+.idea/
+# OS-specific junk
+.DS_Store
+Thumbs.db
+# Cargo local config
+.cargo/
