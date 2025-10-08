@@ -4,5 +4,6 @@ use windows::win32::foundation::HWND;
 fn main() {
     unsafe{
         let mut msg = MSG::default(); 
+        
     }
 }
