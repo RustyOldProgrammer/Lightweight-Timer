@@ -1,6 +1,13 @@
-use windows::win32:UI;
-use windows::win32::system;
-use windows::win32::foundation::HWND;
+#![windows_subsystem = "windows"]
+use windows::Win32::Foundation::HWND;
+use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows::Win32::UI::WindowsAndMessaging::{
+    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, LoadCursorW,
+    RegisterClassW, ShowWindow, TranslateMessage, WNDCLASSW, CW_USEDEFAULT, IDC_ARROW,
+    MSG, SW_SHOW, CS_HREDRAW, CS_VREDRAW, WS_OVERLAPPEDWINDOW,
+};
+use windows::core::PCWSTR;
+
 fn main() {
     unsafe {
         let h_instance = GetModuleHandleW(None).unwrap();
@@ -17,7 +24,19 @@ fn main() {
 
         RegisterClassW(&wnd_class);
 
-        let hwnd = CreateWindowExW(
+        let hwnd = CreateWindowExW( 
+            Default::default(),
+            class_name.as_ptr(),
+            widestring::U16CString::from_str("My Window").unwrap().as_ptr(),
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            800,
+            600,
+            None,
+            None,
+            h_instance,
+            std::ptr::null_mut(),
 
         )
     }
