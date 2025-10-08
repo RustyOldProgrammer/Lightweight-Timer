@@ -1,54 +1,82 @@
 #![windows_subsystem = "windows"]
-use windows::Win32::Foundation::HWND;
+use windows::core::PCWSTR;
+use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+use windows::Win32::Graphics::Gdi::{BeginPaint, EndPaint, PAINTSTRUCT};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, LoadCursorW,
-    RegisterClassW, ShowWindow, TranslateMessage, WNDCLASSW, CW_USEDEFAULT, IDC_ARROW,
-    MSG, SW_SHOW, CS_HREDRAW, CS_VREDRAW, WS_OVERLAPPEDWINDOW,
+    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, LoadCursorW, PostQuitMessage,
+    RegisterClassW, ShowWindow, TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT,
+    IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE
 };
-use windows::core::PCWSTR;
 
-fn to_wstring(s: &str) > Vec<u16> {}
-unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, _: usize, _: isize) -> isize {
-    DefWindowProcW(hwnd, msg, usize::default(), isize::default())
+fn to_wstring(s: &str) -> Vec<u16> {
+    use std::os::windows::ffi::OsStrExt;
+    std::ffi::OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
+    }
+
+unsafe extern "system" fn window_proc(hwnd: HWND,
+    msg: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    match msg {
+        WM_PAINT => {
+            let mut ps = PAINTSTRUCT::default();
+            let _hdc = BeginPaint(hwnd, &mut ps);
+            EndPaint(hwnd, &ps);
+            LRESULT(0)
+        }
+        WM_DESTROY => {
+            PostQuitMessage(0);
+            LRESULT(0)
+        }
+        _ => DefWindowProcW(hwnd, msg, wparam, lparam),
+    }
 }
-
-fn main() > windows::core::Result<()> {
+fn main() -> windows::core::Result<()> {
     unsafe {
-        let h_instance = GetModuleHandleW(None).unwrap();
- 
-        let mut msg = MSG::default(); 
+        let h_instance = GetModuleHandleW(None)?;
+        let class_name = to_wstring("Timer");
+        let mut msg = MSG::default();
 
-        let class_name = widestring::U16CString::from_str("MyGuiContainer").unwrap();
+        let h_cursor = LoadCursorW(None, IDC_ARROW)?;
         let wnd_class = WNDCLASSW {
-            lpfnWndProc: Some(DefWindowProcW),
+            lpfnWndProc: Some(window_proc),
             hInstance: h_instance,
-            lpszClassName: class_name.as_ptr(),
-            style: CS_HREDRAW | CS_VREDRAW
+            lpszClassName: PCWSTR(class_name.as_ptr()),
+            style: CS_HREDRAW | CS_VREDRAW,
+            hCursor: h_cursor,
             ..Default::default()
         };
 
-        RegisterClassW(&wnd_class);
+        let atom = RegisterClassW(&wnd_class);
+        if atom == 0 {
+            return Err(windows::core::Error::from_win32());
+        }
 
-        let hwnd = CreateWindowExW( 
+        let hwnd = CreateWindowExW(
             Default::default(),
-            class_name.as_ptr(),
-            widestring::U16CString::from_str("Timer").unwrap().as_ptr(),
+            PCWSTR(class_name.as_ptr()),
+            PCWSTR(to_wstring("Timer").as_ptr()),
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
-            800,
-            600,
+            500,
+            400,
             None,
             None,
             h_instance,
-            std::ptr::null_mut(),
+            None,
         );
+        if hwnd.0 == 0 {
+            return Err(windows::core::Error::from_win32());
+        }
         ShowWindow(hwnd, SW_SHOW);
-        while GetMessageW(&mut msg, None, 0, 0).into() {
+
+        while GetMessageW(&mut msg, HWND(0), 0, 0).into() {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
-        Ok(())
     }
+    Ok(())
 }
