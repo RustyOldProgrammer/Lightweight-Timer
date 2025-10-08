@@ -2,7 +2,9 @@ use windows::win32:UI;
 use windows::win32::system;
 use windows::win32::foundation::HWND;
 fn main() {
-    unsafe{
+    unsafe {
+        let h_instance = GetModuleHandleW(None).unwrap();
+ 
         let mut msg = MSG::default(); 
 
         let class_name = widestring::U16CString::from_str("MyGuiContainer").unwrap();
