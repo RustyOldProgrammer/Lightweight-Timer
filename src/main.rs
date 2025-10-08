@@ -8,7 +8,12 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 use windows::core::PCWSTR;
 
-fn main() {
+fn to_wstring(s: &str) > Vec<u16> {}
+unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, _: usize, _: isize) -> isize {
+    DefWindowProcW(hwnd, msg, usize::default(), isize::default())
+}
+
+fn main() > windows::core::Result<()> {
     unsafe {
         let h_instance = GetModuleHandleW(None).unwrap();
  
@@ -19,6 +24,7 @@ fn main() {
             lpfnWndProc: Some(DefWindowProcW),
             hInstance: h_instance,
             lpszClassName: class_name.as_ptr(),
+            style: CS_HREDRAW | CS_VREDRAW
             ..Default::default()
         };
 
@@ -27,7 +33,7 @@ fn main() {
         let hwnd = CreateWindowExW( 
             Default::default(),
             class_name.as_ptr(),
-            widestring::U16CString::from_str("My Window").unwrap().as_ptr(),
+            widestring::U16CString::from_str("Timer").unwrap().as_ptr(),
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
@@ -37,7 +43,12 @@ fn main() {
             None,
             h_instance,
             std::ptr::null_mut(),
-
-        )
+        );
+        ShowWindow(hwnd, SW_SHOW);
+        while GetMessageW(&mut msg, None, 0, 0).into() {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+        Ok(())
     }
 }
