@@ -1,33 +1,51 @@
 #![windows_subsystem = "windows"]
+use std::thread;
+use std::time::Duration;
 use windows::core::PCWSTR;
-use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
-use windows::Win32::Graphics::Gdi::{BeginPaint, EndPaint, PAINTSTRUCT};
+use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM, RECT, COLORREF};
+use windows::Win32::Graphics::Gdi::{BeginPaint, EndPaint, PAINTSTRUCT, DT_CENTER, DT_SINGLELINE, DrawTextW, SetBkMode, SetTextColor, DT_VCENTER , TRANSPARENT };
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, LoadCursorW, PostQuitMessage,
     RegisterClassW, ShowWindow, TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT,
-    IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE
+    IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE, PostMessageW, WM_CREATE, WM_TIMER
 };
 
 fn to_wstring(s: &str) -> Vec<u16> {
     use std::os::windows::ffi::OsStrExt;
     std::ffi::OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
     }
-
 unsafe extern "system" fn window_proc(hwnd: HWND,
     msg: u32,
     wparam: WPARAM,
     lparam: LPARAM,
 ) -> LRESULT {
     match msg {
-        WM_PAINT => {
-            let mut ps = PAINTSTRUCT::default();
-            let _hdc = BeginPaint(hwnd, &mut ps);
-            EndPaint(hwnd, &ps);
-            LRESULT(0)
-        }
         WM_DESTROY => {
             PostQuitMessage(0);
+            LRESULT(0)
+        }
+        WM_CREATE => {
+            let hwnd_copy = hwnd;
+            thread::spawn(move || loop {
+                thread::sleep(Duration::from_millis(200));
+                let _ = PostMessageW(hwnd_copy, WM_PAINT, WPARAM(0), LPARAM(0));
+            });
+            LRESULT(0)
+        }
+         WM_TIMER | WM_PAINT => {
+            if msg == WM_PAINT {
+                let mut ps = PAINTSTRUCT::default();
+                let hdc = BeginPaint(hwnd, &mut ps);
+                SetBkMode(hdc, TRANSPARENT);
+                SetTextColor(hdc, COLORREF(0x000000u32));
+                let mut rect = RECT { left: 0, top: 0, right: 320, bottom: 100 };
+                let mut buf = to_wstring("00:00");
+                DrawTextW(hdc, &mut buf, &mut rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+                EndPaint(hwnd, &ps);
+            } else {
+                PostMessageW(hwnd, WM_PAINT, WPARAM(0), LPARAM(0));
+            }
             LRESULT(0)
         }
         _ => DefWindowProcW(hwnd, msg, wparam, lparam),
