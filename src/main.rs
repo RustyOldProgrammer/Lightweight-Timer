@@ -10,6 +10,14 @@ use windows::Win32::UI::WindowsAndMessaging::{
     RegisterClassW, ShowWindow, TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT,
     IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE, PostMessageW, WM_CREATE, WM_TIMER
 };
+use windows::Win32::UI::Input::KeyboardAndMouse::{RegisterHotKey, UnregisterHotKey, HOT_KEY_MODIFIERS};
+
+const HOTKEY_ID_START_PAUSE: i32 = 1;
+const HOTKEY_ID_RESET: i32 = 2;
+const HOTKEY_MODIFIERS_CTRL: u32 = 0x0002; // CTRL only
+const HOTKEY_MODIFIERS_NONE: u32 = 0x0000; // No modifier
+const HOTKEY_VK_START_PAUSE: u32 = 0xDB; //  = '['
+const HOTKEY_VK_RESET: u32 = 0x52; // 'R'
 
 fn to_wstring(s: &str) -> Vec<u16> {
     use std::os::windows::ffi::OsStrExt;
