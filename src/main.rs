@@ -11,9 +11,11 @@ use windows::Win32::UI::WindowsAndMessaging::{
     IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE, PostMessageW, WM_CREATE, WM_TIMER
 };
 use windows::Win32::UI::Input::KeyboardAndMouse::{RegisterHotKey, UnregisterHotKey, HOT_KEY_MODIFIERS};
-
+// [state]  ctrl + [
 const HOTKEY_ID_START_PAUSE: i32 = 1;
+// [state]  ctrl + R
 const HOTKEY_ID_RESET: i32 = 2;
+// to be used so no conflicts in games
 const HOTKEY_MODIFIERS_CTRL: u32 = 0x0002; // CTRL only
 const HOTKEY_MODIFIERS_NONE: u32 = 0x0000; // No modifier
 const HOTKEY_VK_START_PAUSE: u32 = 0xDB; //  = '['
