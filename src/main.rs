@@ -7,7 +7,7 @@ use windows::Win32::Graphics::Gdi::{BeginPaint, EndPaint, PAINTSTRUCT, DT_CENTER
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, LoadCursorW, PostQuitMessage,
-    RegisterClassW, ShowWindow, TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT,
+      RegisterClassW, ShowWindow, TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT,
     IDC_ARROW, MSG, SW_SHOW, WM_DESTROY, WM_PAINT, WNDCLASSW, WS_OVERLAPPEDWINDOW, WS_VISIBLE, PostMessageW, WM_CREATE, WM_TIMER
 };
 use windows::Win32::UI::Input::KeyboardAndMouse::{RegisterHotKey, UnregisterHotKey, HOT_KEY_MODIFIERS};
@@ -18,7 +18,9 @@ const HOTKEY_ID_RESET: i32 = 2;
 // to be used so no conflicts in games
 const HOTKEY_MODIFIERS_CTRL: u32 = 0x0002; // CTRL only
 const HOTKEY_MODIFIERS_NONE: u32 = 0x0000; // No modifier
+//start recording and pause recording
 const HOTKEY_VK_START_PAUSE: u32 = 0xDB; //  = '['
+//fully reset to 00:00
 const HOTKEY_VK_RESET: u32 = 0x52; // 'R'
 
 fn to_wstring(s: &str) -> Vec<u16> {
