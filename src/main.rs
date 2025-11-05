@@ -61,7 +61,7 @@ const HOTKEY_VK_TOGGLE_TRANSPARENCY: u32 = 0xDE; // VK_OEM_7 = '#'
 
 const TIMER_UPDATE_INTERVAL_MS: u64 = 200;
 
-// === Helpers ===
+
 fn to_wstring(s: &str) -> Vec<u16> {
     use std::os::windows::ffi::OsStrExt;
     std::ffi::OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
@@ -74,7 +74,7 @@ fn format_duration(d: Duration) -> String {
     format!("{:02}:{:02}", mins, sec)
 }
 
-// === Timer state ===
+
 thread_local! {
     static TIMER_STATE: RefCell<TimerState> = RefCell::new(TimerState::new());
     static TRANSPARENCY_STATE: RefCell<bool> = RefCell::new(false); // false = visible, true = transparent
@@ -100,7 +100,7 @@ impl TimerState {
     }
 }
 
-// === Window procedure ===
+
 unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg {
         WM_CREATE => {
@@ -116,10 +116,10 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lpar
                 st.font = Some(font);
                 st.hwnd = hwnd;
             });
-            // Default to visible on startup
+
             TRANSPARENCY_STATE.with(|t| *t.borrow_mut() = false);
 
-            // Timer invalidation thread
+
             let hwnd_copy = hwnd;
             thread::spawn(move || loop {
                 thread::sleep(Duration::from_millis(TIMER_UPDATE_INTERVAL_MS));
