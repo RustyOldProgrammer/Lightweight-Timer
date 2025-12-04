@@ -7,7 +7,7 @@ use windows::core::PCWSTR;
 use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, LRESULT, RECT, WPARAM};
 use windows::Win32::Graphics::Gdi::{
     BeginPaint, CreateFontW, EndPaint, HFONT, InvalidateRect, PAINTSTRUCT,
-    SetBkMode, SetTextColor, FillRect, UpdateWindow, TRANSPARENT, CreateSolidBrush
+    SetBkMode, SetTextColor, FillRect, UpdateWindow, TRANSPARENT, CreateSolidBrush, SelectObject
 };
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{RegisterHotKey, UnregisterHotKey, HOT_KEY_MODIFIERS};
@@ -148,10 +148,17 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lpar
             let timer_bg_brush = CreateSolidBrush(COLORREF(0x202020)); // match topbar color or use another
             let _ = FillRect(hdc, &timer_bg_rect, timer_bg_brush);
 
-            // Set text color to black and background to transparent
-            use windows::Win32::Graphics::Gdi::{DrawTextW, DT_CENTER, DT_SINGLELINE, DT_VCENTER};
+            // Set text color to white and background to transparent
+            use windows::Win32::Graphics::Gdi::{DrawTextW, DT_CENTER, DT_SINGLELINE, DT_VCENTER, SelectObject};
             SetBkMode(hdc, TRANSPARENT);
-            SetTextColor(hdc, COLORREF(0x000000)); // black
+            SetTextColor(hdc, COLORREF(0xFFFFFF)); // white
+
+            TIMER_STATE.with(|s| {
+                let st = s.borrow();
+                if let Some(font) = st.font {
+                    SelectObject(hdc, font);
+                }
+            });
 
             let text = TIMER_STATE.with(|s| {
                 let st = s.borrow();
