@@ -101,6 +101,17 @@ impl TimerState {
 }
 
 
+/// # Safety
+///
+/// This is a Win32 window procedure called by the operating system using the
+/// `system` ABI. Rust cannot enforce calling conventions, lifetimes, or
+/// aliasing guarantees for OS-managed callbacks, so this function must be
+/// `unsafe`.
+///
+/// The implementation assumes `hwnd` is valid for the duration of each call,
+/// that GDI objects follow Win32 lifetime rules, and that no background threads
+/// use the window handle after destruction.
+
 unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg {
         WM_CREATE => {
