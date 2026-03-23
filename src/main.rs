@@ -24,7 +24,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     // use windows::Win32::UI::Input::KeyboardAndMouse::ReleaseCapture;
 
 
-// === Configurable constants ===
+//  Configurable constants 
 struct Config {
     pos_x: i32,
     pos_y: i32,
@@ -101,16 +101,7 @@ impl TimerState {
 }
 
 
-/// # Safety
-///
-/// This is a Win32 window procedure called by the operating system using the
-/// `system` ABI. Rust cannot enforce calling conventions, lifetimes, or
-/// aliasing guarantees for OS-managed callbacks, so this function must be
-/// `unsafe`.
-///
-/// The implementation assumes `hwnd` is valid for the duration of each call,
-/// that GDI objects follow Win32 lifetime rules, and that no background threads
-/// use the window handle after destruction.
+/// rust shenanigans.
 
 unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg {
@@ -154,7 +145,7 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lpar
             let hbrush = CreateSolidBrush(CONFIG.topbar_color);
             let _ = FillRect(hdc, &topbar_rect, hbrush);
 
-            // Clear timer text area before drawing new number
+            r
             let timer_bg_rect = RECT { left: 0, top: 28, right: CONFIG.width, bottom: 60 };
             let timer_bg_brush = CreateSolidBrush(COLORREF(0x202020)); // match topbar color or use another
             let _ = FillRect(hdc, &timer_bg_rect, timer_bg_brush);
@@ -239,7 +230,7 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lpar
     }
 }
 
-// === Entry point ===
+//Entry point
 fn main() -> windows::core::Result<()> {
     unsafe {
         let hinstance = GetModuleHandleW(None)?;
